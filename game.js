@@ -5,7 +5,7 @@ class Level1 extends Phaser.Scene{
     preload() {
         this.load.path = 'assets/';
         this.load.image('green_ball', 'green ball.png');
-        this.load.image('peg', 'pinkpeg25%.png');
+        this.load.image('peg', 'pinkpeg25.png');
         this.load.image('floor', 'gamefloor.png')
     }
     create() {
@@ -37,6 +37,7 @@ class Level1 extends Phaser.Scene{
             if (shoot==true) {
                 ball.enableBody(true, cannon.x, cannon.y, true, true);
                 ball.body.onCollide = true;
+                ball.setGravityY(100);
                 shoot = false;
                 this.physics.velocityFromRotation(angle, 600, ball.body.velocity);
                 this.time.delayedCall(10000, () => shoot=true)
@@ -56,18 +57,26 @@ class Level1 extends Phaser.Scene{
 
         Phaser.Actions.PlaceOnLine(
             pegs.getChildren(),
-            new Phaser.Geom.Line(25, 400, 1920, 400),
+            new Phaser.Geom.Line(25, 750, 1920, 750),
         );
         pegs.refresh();
 
         this.physics.add.collider(ball, pegs);
 
+        //when ball hits peg, peg is destroyed. When corrent # of pegs is destroyed, move to summary screen
+        let rem_pegs = 20;
         this.physics.world.on('collide', (gameObject1, gameObject2, body1, body2) => {
             if (gameObject2==ball) {
                 ball.setPosition(960, 0);
                 ball.setVelocity(0, 0);
+                ball.setGravityY(0);
             } else {
                 gameObject2.destroy();
+                rem_pegs = rem_pegs - 1;
+                if(rem_pegs==0) {
+                    this.scene.start(Summary);
+                }
+
             }
         });
 
