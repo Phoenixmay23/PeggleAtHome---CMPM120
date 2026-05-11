@@ -21,8 +21,11 @@ class Level1 extends Phaser.Scene{
 
         ball.disableBody(true, true);
         let angle = 0;
-
         let shoot = true;
+
+        //set ball count
+        let ball_count = 0;
+        
 
         this.input.on('pointermove', (pointer) => {
             if (shoot==true) {
@@ -40,7 +43,7 @@ class Level1 extends Phaser.Scene{
                 ball.setGravityY(100);
                 shoot = false;
                 this.physics.velocityFromRotation(angle, 600, ball.body.velocity);
-                this.time.delayedCall(10000, () => shoot=true)
+                ball_count +=1;
             }
         })
 
@@ -74,7 +77,22 @@ class Level1 extends Phaser.Scene{
                 gameObject2.destroy();
                 rem_pegs = rem_pegs - 1;
                 if(rem_pegs==0) {
-                    this.scene.start(Summary);
+                    ball.destroy();
+                    this.add.text(240, 400,`    Level
+ Complete`, {color: "#ffee00"})
+                        .setFontSize(125);
+        
+                    this.add.text(1060, 550, 'Next Stage', {color: "#ffee00"})
+                        .setFontSize(60)
+                        .setInteractive()
+                        .on('pointerdown', () => {
+                            this.time.delayedCall(1000, () => this.scene.start('level2'))
+                    });
+        
+                    let ball_count_text = this.add.text(1060, 400, 'Balls Used: 0', {color: "#ffee00"})
+                        .setFontSize(60);
+                    
+                    ball_count_text.setText('Balls Used: ' + ball_count);
                 }
 
             }
@@ -103,15 +121,6 @@ class Level3 extends Phaser.Scene{
     }
 }
 
-class Summary extends Phaser.Scene{
-    constructor(){
-        super('summary');
-    }
-    create() {
-
-    }
-}
-
 const config = {
     type: Phaser.AUTO, 
     width: 1920,
@@ -121,7 +130,7 @@ const config = {
         default: 'arcade',
         arcade: {debug: false}
     },
-    scene: [Level1, Level2, Level3, Summary],
+    scene: [Level1, Level2, Level3],
 }
 
 const game = new Phaser.Game(config);
