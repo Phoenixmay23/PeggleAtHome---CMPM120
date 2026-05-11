@@ -5,7 +5,8 @@ class Level1 extends Phaser.Scene{
     preload() {
         this.load.path = 'assets/';
         this.load.image('green_ball', 'green ball.png');
-        this.load.image('peg', 'pinkpeg25%.png');''
+        this.load.image('peg', 'pinkpeg25%.png');
+        this.load.image('floor', 'gamefloor.png')
     }
     create() {
         //cannon + cannon physics
@@ -14,8 +15,7 @@ class Level1 extends Phaser.Scene{
         const ball = this.physics.add.sprite(cannon.x, cannon.y, 'green_ball').setScale(0.25)
             .setBounce(1,1)
             .setCircle(50)
-            .setCollideWorldBounds(true)
-            .setGravityY(200);
+            .setCollideWorldBounds(true);
         const graphics = this.add.graphics({lineStyle: {width: 10, color: 0xdae97c, alpha: 0.5}});
         const line = new Phaser.Geom.Line();
 
@@ -44,10 +44,11 @@ class Level1 extends Phaser.Scene{
         })
 
         //when ball collides with bottom of screen, reenable mouse input (idk what's wrong with this section)
-        const floor = this.add.rectangle(960, 1055, 1920, 50, 0x685f35);
+        const floor = this.physics.add.image(960, 1055, 'floor')
+            .setImmovable(true);
         this.physics.add.collider(floor, ball, () => shoot = true);
 
-
+        //add pegs, when ball hits peg, peg is destroyed
         const pegs = this.physics.add.staticGroup({
             key: 'peg',
             frameQuantity: 20,
@@ -62,8 +63,16 @@ class Level1 extends Phaser.Scene{
         this.physics.add.collider(ball, pegs);
 
         this.physics.world.on('collide', (gameObject1, gameObject2, body1, body2) => {
-            gameObject2.destroy();
-        } )
+            if (gameObject2==ball) {
+                ball.setPosition(960, 0);
+                ball.setVelocity(0, 0);
+            } else {
+                gameObject2.destroy();
+            }
+        });
+
+        //check for completion by counting number of collisions with pegs??
+        //display timer somehow??
     }
 }
 
